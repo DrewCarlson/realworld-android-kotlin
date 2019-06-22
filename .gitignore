@@ -1,0 +1,10 @@
+.idea/
+.gradle/
+build/
+Carthage/
+.DS_Store
+/local.properties
+out/
+xcuserdata/
+*.iml
+node_modules/

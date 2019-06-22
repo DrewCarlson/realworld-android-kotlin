@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="view_type_feed_article" type="id"/>
+    <item name="view_type_feed_loading" type="id"/>
+    <item name="view_type_feed_error" type="id"/>
+</resources>

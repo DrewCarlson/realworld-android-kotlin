@@ -1,0 +1,9 @@
+rootProject.name = 'realworld-kotlin'
+
+include ':app',
+        ':base',
+        ':service',
+        ':models',
+        ':repository:core',
+        ':repository:article',
+        ':ui:feed'
