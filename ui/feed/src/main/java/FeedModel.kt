@@ -1,22 +1,30 @@
 package realworld.ui.feed
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
-import realworld.model.Article
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import realworld.base.PagingModel
+import realworld.model.Article
 
-@Parcelize
+@Serializable
 data class FeedModel(
   val refreshing: Boolean = false,
-  val articles: List<realworld.model.Article> = emptyList(),
+  val articles: List<Article> = emptyList(),
   val isUserAuthenticated: Boolean = false,
   val isViewingUserFeed: Boolean = true,
   val profileImageUrl: String = "",
   override val hasMorePages: Boolean = false,
   override val isLoadingPage: Boolean = true
-) : PagingModel, Parcelable {
+) : PagingModel {
   companion object {
     val DEFAULT = FeedModel()
+
+    fun deserialize(serialModel: String): FeedModel {
+      return Json.nonstrict.parse(serializer(), serialModel)
+    }
+  }
+
+  fun serialize(): String {
+    return Json.nonstrict.stringify(serializer(), this)
   }
 
   override fun toString(): String {

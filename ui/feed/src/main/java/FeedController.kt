@@ -7,7 +7,7 @@ import androidx.core.content.res.getColorOrThrow
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.controller_feed.*
-import kt.mobius.*
+import kt.mobius.Connectable
 import kt.mobius.functions.Consumer
 import realworld.base.BaseController
 import realworld.base.adapter
@@ -29,13 +29,23 @@ class FeedController : BaseController<FeedModel, Any, Any>() {
   override val effectHandler = Connectable<Any, Any> {
     FeedEffectHandler(it, kodein)
   }
+  override val modelSerializer = object : ModelSerializer<FeedModel> {
+    override fun deserialize(model: String): FeedModel {
+      return FeedModel.deserialize(model)
+    }
+
+    override fun serialize(model: FeedModel): String {
+      return model.serialize()
+    }
+  }
 
   override fun bindView(model: FeedModel, output: Consumer<Any>) = bindViews(output) {
     buttonNewArticle.bindClickEvent(FeedEvent.OnCreateArticleClicked)
     refreshFeed.apply {
       bindRefreshEvent(FeedEvent.OnRefresh)
       setColorSchemeColors(
-        context.theme.obtainStyledAttributes(intArrayOf(R.attr.colorAccent))
+        context.theme
+          .obtainStyledAttributes(intArrayOf(R.attr.colorAccent))
           .getColorOrThrow(0))
     }
     recyclerFeed.apply {

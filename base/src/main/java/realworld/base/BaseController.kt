@@ -1,7 +1,7 @@
 package realworld.base
 
 import android.os.Bundle
-import android.os.Parcelable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +20,8 @@ import kt.mobius.runners.WorkRunner
 import kt.mobius.runners.WorkRunners
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
+import java.io.File
+import java.util.*
 
 /**
  * This controller wires together a few important components:
@@ -27,10 +29,9 @@ import org.kodein.di.android.kodein
  * 1) Exposes methods for configuring a [MobiusLoop] and
  *   constructs and manages a [MobiusLoop.Controller].
  * 2) The Kodein dependency graph from [ConduitApp].
- * 3) [LayoutContainer] for using synthetic android extensions
- *   in [bindView].
+ * 3) [LayoutContainer] for using synthetic android extensions in [bindView].
  */
-abstract class BaseController<M : Parcelable, E, F>(
+abstract class BaseController<M, E, F>(
   args: Bundle? = null
 ) : Controller(args), KodeinAware, LayoutContainer {
 
@@ -41,7 +42,19 @@ abstract class BaseController<M : Parcelable, E, F>(
       }
   }
 
+  /**
+   * Represents a class capable of turning a model of [M]
+   * into a String for the purpose of disk storage.
+   */
+  interface ModelSerializer<M> {
+    fun serialize(model: M): String
+    fun deserialize(model: String): M
+  }
+
   companion object {
+    private val TAG = BaseController::class.java.simpleName
+    private val KEY_MODEL_FILE = "$TAG.MODEL_FILE"
+
     /** The default WorkRunner for handling events. */
     private val sharedEventRunner = Producer {
       WorkRunners.cachedThreadPool()
@@ -61,6 +74,16 @@ abstract class BaseController<M : Parcelable, E, F>(
 
   /** Provides the layout ID used in [onCreateView]. */
   protected abstract val layoutId: Int
+
+  /**
+   * An optional [ModelSerializer] implementation used to restore
+   * the model after process death.
+   *
+   * The result of [ModelSerializer.serialize] will be written
+   * to a temporary file and restored with
+   * [ModelSerializer.deserialize] when the app is restored.
+   */
+  protected open val modelSerializer: ModelSerializer<M>? = null
 
   /** The model used when first constructing [loopFactory]. */
   protected abstract val defaultModel: M
@@ -142,14 +165,60 @@ abstract class BaseController<M : Parcelable, E, F>(
     controller.stop()
   }
 
-  override fun onSaveViewState(view: View, outState: Bundle) {
-    super.onSaveViewState(view, outState)
-    outState.putParcelable("model", controller.model)
+  override fun onSaveInstanceState(outState: Bundle) {
+    super.onSaveInstanceState(outState)
+    Log.d(TAG, "Attempting to serialize model.")
+    val serialModel = try {
+      modelSerializer?.serialize(controller.model) ?: return
+    } catch (e: Exception) {
+      Log.e(TAG, "Failed to serialize model.", e)
+      return
+    }
+    Log.d(TAG, "Model serialization successful.")
+    val file = try {
+      Log.d(TAG, "Creating Temp file to save model.")
+      createTempFile("serial-model-${Date().time}")
+    } catch (e: Exception) {
+      Log.e(TAG, "Failed to create temp file.", e)
+      return
+    }
+    // Write serialModel to temp file
+    try {
+      Log.d(TAG, "Writing model to temp file: ${file.absolutePath}")
+      file.writeText(serialModel)
+    } catch (e: Exception) {
+      Log.e(TAG, "Failed to write serialModel to temp file.", e)
+      return
+    }
+    // Success, store filepath for restoration
+    outState.putString(KEY_MODEL_FILE, file.absolutePath)
   }
 
-  override fun onRestoreViewState(view: View, savedViewState: Bundle) {
-    super.onRestoreViewState(view, savedViewState)
-    restoredModel = savedViewState.getParcelable("model")
+  override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+    super.onRestoreInstanceState(savedInstanceState)
+    Log.d(TAG, "Looking for model restoration file.")
+    val filePath = savedInstanceState.getString(KEY_MODEL_FILE) ?: return
+    if (filePath.isNotBlank()) {
+      Log.d(TAG, "Found model restoration file: $filePath")
+      val file = File(filePath)
+      val fileText = try {
+        file.readText()
+      } catch (e: Exception) {
+        Log.e(TAG, "Failed to read restoration file.", e)
+        return
+      }
+      restoredModel = try {
+        modelSerializer?.deserialize(fileText)
+      } catch (e: Exception) {
+        Log.e(TAG, "Failed to deserialize model.", e)
+        return
+      }
+      try {
+        file.delete()
+      } catch(e: Exception) {
+        Log.w(TAG, "Error deleting temporary file.", e)
+      }
+    }
   }
 
   /**

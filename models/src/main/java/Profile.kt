@@ -1,10 +1,7 @@
 package realworld.model
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
 import kotlinx.serialization.Serializable
 
-@Parcelize
 @Serializable
 data class Profile(
   /** The user's username. */
@@ -21,7 +18,7 @@ data class Profile(
    * is following it.
    */
   val following: Boolean
-) : Parcelable {
+) {
   /** Returns the profile image url if available or a default url. */
   fun imageOrDefault(): String {
     return if (image.isNotBlank()) image

@@ -1,10 +1,7 @@
 package realworld.model
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
 import kotlinx.serialization.Serializable
 
-@Parcelize
 @Serializable
 data class Article(
   val slug: String,
@@ -17,7 +14,7 @@ data class Article(
   val favorite: Boolean = false,
   val favoritesCount: Int,
   val author: Profile
-) : Parcelable {
+) {
   private companion object {
     const val MAX_STR_LENGTH = 15
   }
