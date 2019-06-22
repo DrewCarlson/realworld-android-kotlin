@@ -7,9 +7,9 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.view_article.*
 import kt.mobius.functions.Consumer
 import realworld.base.BaseViewHolder
+import realworld.base.PagingModel
 import realworld.base.setUrl
 import realworld.model.Article
-import realworld.base.PagingModel
 
 /** Displays a list of [Article]s and paging states. */
 class FeedAdapter(

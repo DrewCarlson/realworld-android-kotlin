@@ -1,7 +1,5 @@
 package realworld.ui.feed
 
-import realworld.model.Article
-
 sealed class FeedEvent {
 
   /** Dispatch when the user wants to load the latest feed. */

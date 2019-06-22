@@ -2,10 +2,7 @@ package realworld.repository
 
 import android.util.Log
 import io.ktor.client.features.ResponseException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.*
 
 /**
  * Provides facilities for loading data from multiple sources
