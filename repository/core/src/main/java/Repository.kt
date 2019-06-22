@@ -54,6 +54,9 @@ interface Repository {
           // Limit reached, bubble error
           throw e
         }
+      } catch (e: CancellationException) {
+        Log.d(TAG, "Network request cancelled.", e)
+        return@repeat
       } catch (e: Exception) {
         Log.e(TAG, "Unhandled exception", e)
         if (retryIndex == NET_RETRY_LIMIT_INDEX) {
