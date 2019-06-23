@@ -1,5 +1,7 @@
 package realworld.ui.navigation
 
+import android.util.Log
+
 /** Handles navigating to the initial screen when booting. */
 interface LaunchNavigator<F : NavigationEffect> : Navigator<F> {
   /** The NavigationEffect to launch with. */
@@ -13,6 +15,8 @@ interface LaunchNavigator<F : NavigationEffect> : Navigator<F> {
 interface LaunchScreen {
 
   companion object {
+    private val TAG = LaunchScreen::class.java.simpleName
+
     inline operator fun <reified F : NavigationEffect> invoke(
       default: F,
       crossinline navigator: () -> Navigator<F>
@@ -33,7 +37,10 @@ interface LaunchScreen {
 
   /** Dispatch [LaunchNavigator.launchEffect] to [Navigator.navigate]. */
   fun launch() {
-    launchNavigator.accept(launchNavigator.launchEffect)
+    val effect = launchNavigator.launchEffect
+    Log.d(TAG, "Executing LaunchNavigator with $effect")
+    launchNavigator.accept(effect)
+    Log.d(TAG, "Effect dispatched successfully.")
   }
 }
 

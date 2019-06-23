@@ -1,10 +1,12 @@
 package realworld.ui.navigation
 
+import android.util.Log
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
+import kotlin.reflect.KClass
 
 /**
  * A base [Navigator] that uses a Conductor [router] to handle [NavigationEffect]s.
@@ -15,8 +17,15 @@ abstract class ConductorNavigator<T : NavigationEffect>(
   private val router: Router
 ) : MainNavigator<T>() {
 
+  companion object {
+    private val TAG = ConductorNavigator::class.java.simpleName
+  }
+
   /** Returns an instance of the target [Controller] configured with [effect]. */
   abstract fun createController(effect: T): Controller
+
+  /** Returns the [KClass] of the controller for the configured [effect]. */
+  abstract fun getKClassForEffect(effect: T): KClass<*>
 
   /** The push [ControllerChangeHandler] used in [createTransaction]. */
   open fun pushChangeHandler(effect: T): ControllerChangeHandler = FadeChangeHandler()
@@ -26,8 +35,12 @@ abstract class ConductorNavigator<T : NavigationEffect>(
 
   /** Navigate to the [Controller] returned by [createController]. */
   override fun navigate(effect: T) {
-    navigateWithRouter(effect.navigationData) {
-      createController(effect).createTransaction(effect, effect.navigationData.animate)
+    try {
+      navigateWithRouter(effect) {
+        createController(effect).createTransaction(effect, effect.navigationData.animate)
+      }
+    } catch (e: Exception) {
+      Log.e(TAG, "Failed executing Router navigation to $effect", e)
     }
   }
 
@@ -42,20 +55,45 @@ abstract class ConductorNavigator<T : NavigationEffect>(
    * A default [NavigationData] will use [Router.setRoot] if no
    * root is set, otherwise [Router.pushController].
    *
-   * @param navigationData The [NavigationData] to navigate with.
+   * [createTransaction] is not called if instructed to reuse
+   * a [Controller] instance that is already in the stack.
+   *
+   * @param effect The [NavigationEffect] to navigate with.
    * @param createTransaction The [RouterTransaction] to execute.
    */
-  fun navigateWithRouter(
-    navigationData: NavigationData,
-    createTransaction: () -> RouterTransaction
-  ) {
-    val transaction = createTransaction()
+  private fun navigateWithRouter(effect: T, createTransaction: () -> RouterTransaction) {
+    val navigationData = effect.navigationData
     when {
       navigationData.clearHistory ->
-        router.setBackstack(listOf(transaction), null/* TODO: Change handler options */)
-      navigationData.replace -> router.replaceTopController(transaction)
-      router.hasRootController() -> router.pushController(transaction)
-      else -> router.setRoot(transaction)
+        router.setBackstack(listOf(createTransaction()), null/* TODO: Change handler options */)
+      navigationData.replace -> router.replaceTopController(createTransaction())
+      navigationData.popIfPrevious -> {
+        val backstack = router.backstack
+        val isPreviousInStack = backstack
+          .filterIndexed { index, routerTransaction ->
+            routerTransaction.controller()::class == getKClassForEffect(effect) &&
+                index == backstack.lastIndex - 1
+          }.size == 1
+        if (isPreviousInStack) {
+          router.handleBack()
+        } else {
+          router.pushController(createTransaction())
+        }
+      }
+      navigationData.popToPrevious -> {
+        val backstack = router.backstack
+        val lastIndex = backstack.indexOfLast { routerTransaction ->
+          routerTransaction.controller()::class == getKClassForEffect(effect)
+        }
+
+        when {
+          lastIndex > 0 -> router.setBackstack(backstack.take(lastIndex), null/* TODO: Change handler options */)
+          lastIndex == 0 -> router.setBackstack(backstack.take(1), null/* TODO: Change handler options */)
+          else -> router.pushController(createTransaction())
+        }
+      }
+      router.hasRootController() -> router.pushController(createTransaction())
+      else -> router.setRoot(createTransaction())
     }
   }
 

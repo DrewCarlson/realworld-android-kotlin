@@ -10,6 +10,7 @@ import realworld.service.ConduitService
 import realworld.ui.feed.FeedEffect.LoadArticles
 import realworld.ui.feed.FeedEffect.LoadArticlesFeed
 import realworld.ui.feed.FeedEvent.*
+import realworld.ui.navigation.SigninNavigator
 import realworld.ui.navigation.ViewArticleNavigator
 
 
@@ -24,6 +25,7 @@ val FeedUpdate = Update<FeedModel, FeedEvent, Any> { model, event ->
     OnRefresh -> onRefresh(model)
     is OnUserAuthChanged -> TODO("OnUserAuthChanged")
     is OnCreateArticleClicked -> TODO("OnCreateArticleClicked")
+    OnSigninClicked -> onSigninClicked()
   }
 }
 
@@ -130,3 +132,6 @@ private fun onRefresh(model: FeedModel) = when {
     }
   }
 }
+
+private fun onSigninClicked() =
+  dispatch<FeedModel, Any>(setOf(SigninNavigator.Effect()))

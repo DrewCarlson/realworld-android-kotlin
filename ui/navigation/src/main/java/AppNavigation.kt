@@ -8,7 +8,8 @@ interface FeedNavigator : Navigator<FeedNavigator.Effect> {
    *
    */
   data class Effect(
-    override val navigationData: NavigationData = NavigationData.default()
+    override val navigationData: NavigationData =
+      NavigationData.default(popToPrevious = true)
   ) : NavigationEffect
 }
 
@@ -21,6 +22,18 @@ interface ViewArticleNavigator : Navigator<ViewArticleNavigator.Effect> {
    */
   data class Effect(
     val article: Article,
+    override val navigationData: NavigationData = NavigationData.default()
+  ) : NavigationEffect
+}
+
+
+/** */
+interface SigninNavigator : Navigator<SigninNavigator.Effect> {
+
+  /**
+   *
+   */
+  data class Effect(
     override val navigationData: NavigationData = NavigationData.default()
   ) : NavigationEffect
 }

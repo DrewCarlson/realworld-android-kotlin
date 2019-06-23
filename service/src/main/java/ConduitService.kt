@@ -6,13 +6,9 @@ import io.ktor.content.TextContent
 import io.ktor.http.ContentType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.map
-import kotlinx.serialization.serializer
-import realworld.model.Article
-import realworld.model.Comment
-import realworld.model.Profile
-import realworld.model.User
+import kotlinx.serialization.json.JsonObjectBuilder
+import kotlinx.serialization.json.json
+import realworld.model.*
 
 /**
  * RealWorld Api Spec: https://github.com/gothinkster/realworld/tree/master/api
@@ -22,35 +18,30 @@ class ConduitService(
 ) {
 
   companion object {
+    /** The default amount of articles to load in a list. */
     const val ARTICLE_LIMIT = 20
   }
 
-  private suspend fun <R> onIO(func: suspend () -> R): R {
-    return withContext(Dispatchers.IO) {
-      func()
+  suspend fun login(email: String, password: String) = onIO {
+    httpClient.post<SigninResponse>("api/users/login") {
+      jsonBody {
+        "user" to json {
+          "email" to email
+          "password" to password
+        }
+      }
     }
   }
 
-  suspend fun login(email: String, password: String) =
-    onIO {
-      httpClient.post<User>("api/users/login") {
-        body = jsonBody(
-          "email" to email,
-          "password" to password
-        )
+  suspend fun register(username: String, email: String, password: String) = onIO {
+    httpClient.post<User>("api/users/register") {
+      jsonBody {
+        "email" to email
+        "username" to username
+        "password" to password
       }
     }
-
-  suspend fun register(username: String, email: String, password: String) =
-    onIO {
-      httpClient.post<User>("api/users/register") {
-        body = jsonBody(
-          "email" to email,
-          "username" to username,
-          "password" to password
-        )
-      }
-    }
+  }
 
   suspend fun getUser() = onIO { httpClient.get<User>("api/user") }
 
@@ -62,14 +53,13 @@ class ConduitService(
     bio: String? = null
   ) = onIO {
     httpClient.put<User>("api/user") {
-      this.body = jsonBody(
-        "email" to email,
-        "username" to username,
-        "password" to password,
-        "image" to image,
-        "bio" to bio,
-        stripNulls = true
-      )
+      jsonBody {
+        email?.let { "email" to it }
+        username?.let { "username" to it }
+        password?.let { "password" to it }
+        image?.let { "image" to it }
+        bio?.let { "bio" to it }
+      }
     }
   }
 
@@ -89,7 +79,7 @@ class ConduitService(
     limit: Int = ARTICLE_LIMIT,
     offset: Int = 0
   ) = onIO {
-    httpClient.get<realworld.model.Articles>("api/articles") {
+    httpClient.get<Articles>("api/articles") {
       parameter("tag", tag)
       parameter("author", author)
       parameter("favoritedBy", favoritedBy)
@@ -100,7 +90,7 @@ class ConduitService(
 
   suspend fun getArticlesFeed(limit: Int = ARTICLE_LIMIT, offset: Int = 0) =
     onIO {
-      httpClient.get<realworld.model.Articles>("api/articles/feed") {
+      httpClient.get<Articles>("api/articles/feed") {
         parameter("limit", limit)
         parameter("offset", offset)
       }
@@ -116,13 +106,12 @@ class ConduitService(
     tagList: List<String>
   ) = onIO {
     httpClient.put<Article>("api/articles") {
-      this.body = jsonBody(
-        "title" to title,
-        "description" to description,
-        "body" to body,
-        "tagList" to tagList.stringify(),
-        stripNulls = true
-      )
+      jsonBody {
+        "title" to title
+        "description" to description
+        "body" to body
+        "tagList" to tagList
+      }
     }
   }
 
@@ -133,12 +122,11 @@ class ConduitService(
     body: String? = null
   ) = onIO {
     httpClient.put<Article>("api/articles/$slug") {
-      this.body = jsonBody(
-        "title" to title,
-        "description" to description,
-        "body" to body,
-        stripNulls = true
-      )
+      jsonBody {
+        title?.let { "title" to it }
+        description?.let { "description" to it }
+        body?.let { "body" to it }
+      }
     }
   }
 
@@ -148,9 +136,11 @@ class ConduitService(
   suspend fun addComment(slug: String, body: String) =
     onIO {
       httpClient.post<Comment>("api/articles/$slug/comments") {
-        this.body = jsonBody(
-          "comment" to mapOf("body" to body).stringify()
-        )
+        jsonBody {
+          "comment" to json {
+            "body" to body
+          }
+        }
       }
     }
 
@@ -169,44 +159,15 @@ class ConduitService(
   suspend fun getTags() = onIO { httpClient.get<List<String>>("api/tags") }
 
   /**
-   * Produces a TextContent of "application/json" from a
-   * list of pairs.
    *
-   * @param fields Pairs of keys and values to be turned into a json object.
-   * @param stripNulls When enabled, keys with null values will be removed from the output.
    */
-  @Suppress("UNCHECKED_CAST")
-  private fun jsonBody(
-    vararg fields: Pair<String, Any?>,
-    stripNulls: Boolean = false
-  ): TextContent {
-    val bodyMap = fields.toList()
-      .run {
-        if (stripNulls)
-          filter { it.second != null }
-        else this
-      }
-      .map { pair ->
-        when {
-          pair.second is String -> pair
-          else -> pair.copy(
-            second = pair.second.toString()
-          )
-        } as Pair<String, String>
-      }
-      .toMap()
-    return TextContent(bodyMap.stringify(), ContentType.Application.Json)
+  // TODO: relocate
+  private fun HttpRequestBuilder.jsonBody(builder: JsonObjectBuilder.() -> Unit) {
+    this.body = TextContent(json(builder).toString(), ContentType.Application.Json)
   }
 
-  private fun Map<String, String>.stringify(): String {
-    val stringMapSerializer = (String.serializer() to String.serializer()).map
-    return Json.nonstrict.stringify(stringMapSerializer, this)
+  /** Executing the suspend [block] with [Dispatchers.IO]. */
+  private suspend fun <R> onIO(block: suspend () -> R): R {
+    return withContext(Dispatchers.IO) { block() }
   }
-
-  private fun <E> Iterable<E>.stringify() =
-    joinToString(
-      separator = "\", \"",
-      prefix = "[\"",
-      postfix = "\"]"
-    )
 }

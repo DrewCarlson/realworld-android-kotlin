@@ -13,6 +13,9 @@ sealed class FeedEvent {
   /** Dispatch when the user wants to create a new article. */
   object OnCreateArticleClicked : FeedEvent()
 
+  /** */
+  object OnSigninClicked : FeedEvent()
+
   /** Dispatch when the user wants to look at the global feed. */
   object OnArticlesClicked : FeedEvent()
 

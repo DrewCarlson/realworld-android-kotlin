@@ -10,6 +10,9 @@ val NavigationModule = Kodein.Module("Navigation") {
   bind<LaunchScreen>() with factory { router: Router ->
     LaunchScreen(FeedNavigator.Effect(NavigationData.coldLaunch())) {
       instance<Router, FeedNavigator>(arg = router)
-    }
+    }/*
+    LaunchScreen(SigninNavigator.Effect(NavigationData.coldLaunch())) {
+      instance<Router, SigninNavigator>(arg = router)
+    }*/
   }
 }

@@ -2,9 +2,10 @@ package realworld.base
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.EditText
+import androidx.appcompat.widget.Toolbar
+import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bluelinelabs.conductor.Controller
@@ -76,6 +77,9 @@ abstract class BaseController<M, E, F>(
   /** Provides the layout ID used in [onCreateView]. */
   protected abstract val layoutId: Int
 
+  /** */
+  private var menu: Menu? = null
+
   /**
    * An optional [ModelSerializer] implementation used to restore
    * the model after process death.
@@ -141,6 +145,7 @@ abstract class BaseController<M, E, F>(
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup): View {
     return inflater.inflate(layoutId, container, false).also { view ->
       containerView = view
+      menu = view.findViewWithTag<Toolbar>("toolbar")?.menu
       controller.connect(Connectable {
         object : Connection<M>, Disposable by bindView(controller.model, it) {
           override fun accept(value: M) = render(value)
@@ -151,6 +156,7 @@ abstract class BaseController<M, E, F>(
 
   override fun onDestroyView(view: View) {
     controller.disconnect()
+    menu = null
     clearFindViewByIdCache()
     containerView = null
     super.onDestroyView(view)
@@ -249,7 +255,7 @@ abstract class BaseController<M, E, F>(
     output: Consumer<E>,
     bindings: ViewBindingScope<M, E>.() -> Unit
   ): Disposable {
-    return ViewBindingScope(output) { controller.model }.apply(bindings)
+    return ViewBindingScope(output, menu) { controller.model }.apply(bindings)
   }
 
   /**
@@ -257,6 +263,7 @@ abstract class BaseController<M, E, F>(
    */
   class ViewBindingScope<M, E>(
     private val output: Consumer<E>,
+    private val menu: Menu?,
     private val resolveModel: () -> M
   ) : Disposable {
 
@@ -287,6 +294,24 @@ abstract class BaseController<M, E, F>(
     fun SwipeRefreshLayout.bindRefreshEvent(event: E) {
       setOnRefreshListener {
         output.accept(event)
+      }
+    }
+
+    /**  */
+    fun EditText.bindTextChange(eventFactory: (String) -> E) {
+      addTextChangedListener { text ->
+        output.accept(eventFactory(text?.toString() ?: ""))
+      }
+    }
+
+    fun bindMenuItemClick(itemId: Int, event: E) {
+      checkNotNull(menu) {
+        // TODO: Tag name as resource
+        "Using bindMenuItemClick requires providing a menu.  Tag your Toolbar view with 'toolbar'."
+      }
+      menu.findItem(itemId).setOnMenuItemClickListener {
+        output.accept(event)
+        true
       }
     }
 

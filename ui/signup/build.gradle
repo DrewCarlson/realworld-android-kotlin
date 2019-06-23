@@ -1,4 +1,4 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
@@ -7,24 +7,12 @@ android {
     compileSdkVersion 28
 
     defaultConfig {
-        applicationId "realworld.android"
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-
-    packagingOptions {
-        exclude 'META-INF/*.kotlin_module'
     }
 }
 
@@ -34,16 +22,11 @@ androidExtensions {
 
 dependencies {
     implementation project(":base")
-    implementation project(":models")
     implementation project(":ui:navigation")
-    implementation project(":ui:feed")
-    implementation project(":ui:viewarticle")
-    implementation project(":ui:signin")
-    implementation project(":ui:signup")
 
     // Kotlinx
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
 
     // Androidx
@@ -55,14 +38,17 @@ dependencies {
     // Material components
     implementation "com.google.android.material:material:$material_version"
 
-    // Leakcanary: Memory leak tracking
-    debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakcanary_version"
+    // Mobius: UI and App architecture
+    api "kt.mobius:mobius-core-jvm:$mobiuskt_version"
+    api "kt.mobius:mobius-extras-jvm:$mobiuskt_version"
+    api "kt.mobius:mobius-android:$mobiuskt_version"
 
-    // TODO: Move to repo module
-    implementation "io.ktor:ktor-client-core-jvm:$ktor_version"
+    // Conductor: View based navigation
+    api "com.bluelinelabs:conductor:$conductor_version"
 
     // Kodein: Dependency injection
-    implementation "org.kodein.di:kodein-di-framework-android-x:$kodein_version"
+    api "org.kodein.di:kodein-di-erased-jvm:$kodein_version"
+    api "org.kodein.di:kodein-di-framework-android-core:$kodein_version"
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'

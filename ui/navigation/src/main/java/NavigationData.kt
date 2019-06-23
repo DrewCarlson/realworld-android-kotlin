@@ -16,17 +16,32 @@ data class NavigationData(
   val clearHistory: Boolean = false,
   /** If true, the current screen will be replaced with the incoming one. */
   val replace: Boolean = false,
+  /** True when the effect is dispatched by [LaunchScreen]. */
+  val coldLaunch: Boolean = false,
   /** Navigate immediately, skipping any pending animations. */
   val animate: Boolean = true,
-  /** True when the effect is dispatched by [LaunchScreen]. */
-  val coldLaunch: Boolean = false
+  /**
+   * If the incoming and previous screens are identical,
+   * the new screen will not be created and the current
+   * one will be removed from the stack.
+   */
+  val popIfPrevious: Boolean = false,
+  /**
+   * If the incoming screen is in the stack, remove ach screen from
+   * the stack until we hit the incoming screen instance.
+   */
+  val popToPrevious: Boolean = false
 ) {
   companion object {
     /** Put the incoming screen on the top of the navigation stack. */
     fun default(
-      animate: Boolean = true
+      animate: Boolean = true,
+      popIfPrevious: Boolean = false,
+      popToPrevious: Boolean = false
     ) = NavigationData(
-      animate = animate
+      animate = animate,
+      popIfPrevious = popIfPrevious,
+      popToPrevious = popToPrevious
     )
 
     /** Replace the top screen of the navigation stack with the incoming screen. */

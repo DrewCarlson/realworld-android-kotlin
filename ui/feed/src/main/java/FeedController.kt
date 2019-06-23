@@ -17,6 +17,7 @@ import org.kodein.di.direct
 import org.kodein.di.erased.instance
 import realworld.base.BaseController
 import realworld.base.adapter
+import realworld.ui.navigation.SigninNavigator
 import realworld.ui.navigation.ViewArticleNavigator
 
 /** Displays the global feed and user feed if authenticated. */
@@ -45,6 +46,9 @@ class FeedController : BaseController<FeedModel, Any, Any>() {
     },
     Connectable {
       innerConnection(direct.instance<Router, ViewArticleNavigator>(arg = router))
+    },
+    Connectable {
+      innerConnection(direct.instance<Router, SigninNavigator>(arg = router))
     }
   )
 
@@ -59,6 +63,7 @@ class FeedController : BaseController<FeedModel, Any, Any>() {
   }
 
   override fun bindView(model: FeedModel, output: Consumer<Any>) = bindViews(output) {
+    bindMenuItemClick(R.id.item_signin, FeedEvent.OnSigninClicked)
     buttonNewArticle.bindClickEvent(FeedEvent.OnCreateArticleClicked)
     refreshFeed.apply {
       bindRefreshEvent(FeedEvent.OnRefresh)

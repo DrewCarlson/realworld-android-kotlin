@@ -18,7 +18,10 @@ class FeedAdapter(
   private val output: Consumer<Any>
 ) : RecyclerView.Adapter<FeedAdapter.ViewHolder>() {
 
-  /** The list of articles to be displayed. */
+  /**
+   * The list of articles to be displayed.
+   * Calls [notifyDataSetChanged] when set and ignores duplicate lists.
+   */
   var articles: List<Article> = articles
     set(value) {
       if (field == value) return
@@ -26,7 +29,10 @@ class FeedAdapter(
       notifyDataSetChanged()
     }
 
-  /** The state of our list. */
+  /**
+   * The paging state of our list.
+   * Calls [notifyDataSetChanged] when set and ignores duplicate lists.
+   */
   var pagingModel: PagingModel = pagingModel
     set(value) {
       if (field == value) return
@@ -34,6 +40,11 @@ class FeedAdapter(
       notifyDataSetChanged()
     }
 
+  /**
+   * Returns the size of [articles].
+   *
+   * Each not list item type that is displayed increments the count.
+   */
   override fun getItemCount(): Int {
     val extras = listOf(
       pagingModel.isLoadingPage
