@@ -10,6 +10,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
         classpath 'com.android.tools.build:gradle:3.4.1'
+        classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$dokka_version"
     }
 }
 
@@ -18,5 +19,37 @@ allprojects {
         mavenCentral()
         google()
         jcenter()
+    }
+}
+
+subprojects {
+    apply plugin: 'org.jetbrains.dokka-android'
+}
+
+apply plugin: 'org.jetbrains.dokka-android'
+dokka {
+    outputFormat = 'html'
+    outputDirectory = "$buildDir/javadoc"
+    includes = ['packages.md', 'extra.md']
+    sourceDirs = files(
+            'app/src/main/java',
+            'base/src/main/java',
+            'models/src/main/java',
+            'repository/core/src/main/java',
+            'repository/article/src/main/java',
+            'service/src/main/java',
+            'ui/feed/src/main/java',
+            'ui/navigation/src/main/java',
+            'ui/viewarticle/src/main/java',
+    )
+
+    linkMapping {
+        dir = "./"
+        url = "https://github.com/DrewCarlson/realworld-android-kotlin/blob/master/"
+        suffix = "#L"
+    }
+
+    externalDocumentationLink {
+        url = new URL("https://drewcarlson.github.io/kotlin-mobius/")
     }
 }
