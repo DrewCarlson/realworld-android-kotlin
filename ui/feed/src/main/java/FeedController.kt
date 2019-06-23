@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bluelinelabs.conductor.Router
 import kotlinx.android.synthetic.main.controller_feed.*
 import kt.mobius.Connectable
+import kt.mobius.Next.Companion.noChange
+import kt.mobius.Update
 import kt.mobius.extras.CompositeEffectHandler
 import kt.mobius.functions.Consumer
 import org.kodein.di.direct
@@ -29,8 +31,14 @@ class FeedController : BaseController<FeedModel, Any, Any>() {
 
   override val layoutId = R.layout.controller_feed
   override val defaultModel = FeedModel.DEFAULT
-  override val update = FeedUpdate
-  override val init get() = FeedInit(kodein)
+  override val update = Update { model: FeedModel, event: Any ->
+    // TODO: We will map events like auth state change, to FeedEvents
+    //      or map model for event's update function.
+    if (event is FeedEvent) {
+      FeedUpdate(model, event)
+    } else noChange()
+  }
+  override val init = FeedInit
   override val effectHandler = CompositeEffectHandler.from<Any, Any>(
     Connectable {
       FeedEffectHandler(it, kodein)
@@ -54,11 +62,7 @@ class FeedController : BaseController<FeedModel, Any, Any>() {
     buttonNewArticle.bindClickEvent(FeedEvent.OnCreateArticleClicked)
     refreshFeed.apply {
       bindRefreshEvent(FeedEvent.OnRefresh)
-      setColorSchemeColors(
-        context.theme
-          .obtainStyledAttributes(intArrayOf(R.attr.colorAccent))
-          .getColorOrThrow(0)
-      )
+      setColorSchemeColors(context.getColorForAttr(R.attr.colorAccent))
     }
     recyclerFeed.apply {
       adapter = FeedAdapter(model.articles, model, output)
@@ -94,6 +98,15 @@ class FeedController : BaseController<FeedModel, Any, Any>() {
   override fun onRestoreInstanceState(savedInstanceState: Bundle) {
     super.onRestoreInstanceState(savedInstanceState)
     restoredLayoutManagerState = savedInstanceState.getParcelable(LAYOUT_MANAGER_KEY)
+  }
+
+  /**
+   *
+   */
+  // TODO: Relocate
+  private fun Context.getColorForAttr(attr: Int): Int {
+    return theme.obtainStyledAttributes(intArrayOf(attr))
+      .getColorOrThrow(0)
   }
 }
 

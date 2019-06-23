@@ -26,7 +26,7 @@ sealed class FeedEvent {
   data class OnArticleClicked(val article: Article) : FeedEvent()
 
   /** Dispatch when new feed results are available. */
-  data class OnArticlesLoaded(val articles: List<realworld.model.Article>) : FeedEvent() {
+  data class OnArticlesLoaded(val articles: List<Article>) : FeedEvent() {
     override fun toString() = "OnArticlesLoaded(articles=(size:${articles.size}))"
   }
 

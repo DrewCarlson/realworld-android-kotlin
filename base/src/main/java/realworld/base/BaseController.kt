@@ -329,7 +329,7 @@ abstract class BaseController<M, E, F>(
 
   /**
    * Returns a new [Connection] of [O] that only accepts values when
-   * [connection] receives a value of type [I] that is also [O].
+   * the returned [Connection] receives a value of type [I] that is also [O].
    */
   // TODO: Move to mobius
   inline fun <reified I, reified O> innerConnection(connection: Connection<I>): Connection<O> {

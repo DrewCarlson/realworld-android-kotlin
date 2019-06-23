@@ -33,7 +33,8 @@ class ConduitApp : Application(), KodeinAware {
 
     bind<ViewArticleNavigator>() with factory { router: Router ->
       object : ConductorNavigator<ViewArticleNavigator.Effect>(router), ViewArticleNavigator {
-        override fun createController(effect: ViewArticleNavigator.Effect) = ViewArticleController()
+        override fun createController(effect: ViewArticleNavigator.Effect) =
+          ViewArticleController(effect.article)
         override fun pushChangeHandler(effect: ViewArticleNavigator.Effect) =
           if (effect.navigationData.coldLaunch) {
             FadeChangeHandler()

@@ -13,7 +13,7 @@ import realworld.ui.feed.FeedEvent.*
 import realworld.ui.navigation.ViewArticleNavigator
 
 
-val FeedUpdate = Update<FeedModel, Any, Any> { model, event ->
+val FeedUpdate = Update<FeedModel, FeedEvent, Any> { model, event ->
   when (event) {
     OnLoadMore -> onLoadMore(model)
     OnArticlesClicked -> onArticlesClicked(model)
@@ -24,7 +24,6 @@ val FeedUpdate = Update<FeedModel, Any, Any> { model, event ->
     OnRefresh -> onRefresh(model)
     is OnUserAuthChanged -> TODO("OnUserAuthChanged")
     is OnCreateArticleClicked -> TODO("OnCreateArticleClicked")
-    else -> noChange()
   }
 }
 
@@ -70,12 +69,12 @@ private fun onArticlesLoaded(model: FeedModel, event: OnArticlesLoaded) = when {
 private fun onArticlesLoadFailed(
   model: FeedModel,
   event: OnArticlesLoadFailed
-) = when {
+): Next<FeedModel, Any> = when {
   model.refreshing -> {
     next(
       model.copy(
         refreshing = false
-      ), emptySet<Any>()
+      )
     )
   }
   else -> {
@@ -97,20 +96,18 @@ private fun onArticleClicked(
 }
 
 private fun onArticlesClicked(model: FeedModel): Next<FeedModel, Any> {
-  return next<FeedModel, Any>(
+  return next(
     model.copy(isViewingUserFeed = false),
     effects(
-      //AnalyticsEffect.Track("View", "Article", ""),
       LoadArticles()
     )
   )
 }
 
 private fun onArticlesFeedClicked(model: FeedModel): Next<FeedModel, Any> {
-  return next<FeedModel, Any>(
+  return next(
     model.copy(isViewingUserFeed = true),
     effects(
-      //AnalyticsEffect.Track("View", "Article", ""),
       LoadArticlesFeed()
     )
   )
