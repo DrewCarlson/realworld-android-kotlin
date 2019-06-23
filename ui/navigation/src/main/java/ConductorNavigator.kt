@@ -88,7 +88,7 @@ abstract class ConductorNavigator<T : NavigationEffect>(
 
         when {
           lastIndex > 0 -> router.setBackstack(backstack.take(lastIndex), null/* TODO: Change handler options */)
-          lastIndex == 0 -> router.setBackstack(backstack.take(1), null/* TODO: Change handler options */)
+          lastIndex == 0 -> router.popToRoot(null/* TODO: Change handler options */)
           else -> router.pushController(createTransaction())
         }
       }

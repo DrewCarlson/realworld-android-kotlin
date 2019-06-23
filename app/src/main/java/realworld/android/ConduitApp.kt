@@ -36,6 +36,16 @@ class ConduitApp : Application(), KodeinAware {
       object : ConductorNavigator<SigninNavigator.Effect>(router), SigninNavigator {
         override fun getKClassForEffect(effect: SigninNavigator.Effect): KClass<*> = SigninController::class
         override fun createController(effect: SigninNavigator.Effect) = SigninController()
+
+        override fun pushChangeHandler(effect: SigninNavigator.Effect) =
+          if (effect.navigationData.coldLaunch) {
+            FadeChangeHandler()
+          } else {
+            HorizontalChangeHandler()
+          }
+
+        override fun popChangeHandler(effect: SigninNavigator.Effect) =
+          pushChangeHandler(effect)
       }
     }
 
