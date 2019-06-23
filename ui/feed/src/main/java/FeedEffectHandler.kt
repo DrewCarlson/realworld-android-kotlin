@@ -40,18 +40,22 @@ class FeedEffectHandler(
 
   private suspend fun loadArticles(offset: Int) {
     val result = articleRepository.getArticles(offset = offset)
-    output.accept(when (result) {
-      is Success -> OnArticlesLoaded(result.data)
-      is Fail -> OnArticlesLoadFailed(result.error.message ?: "Error loading articles!")
-    })
+    output.accept(
+      when (result) {
+        is Success -> OnArticlesLoaded(result.data)
+        is Fail -> OnArticlesLoadFailed(result.error.message ?: "Error loading articles!")
+      }
+    )
   }
 
   private suspend fun loadArticlesFeed(offset: Int) {
     val result = articleRepository.getArticlesFeed(offset = offset)
-    output.accept(when (result) {
-      is Success -> OnArticlesLoaded(result.data)
-      is Fail -> OnArticlesLoadFailed(result.error.message ?: "Error loading articles!")
-    })
+    output.accept(
+      when (result) {
+        is Success -> OnArticlesLoaded(result.data)
+        is Fail -> OnArticlesLoadFailed(result.error.message ?: "Error loading articles!")
+      }
+    )
   }
 
   override fun dispose() {

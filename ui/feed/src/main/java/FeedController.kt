@@ -6,11 +6,16 @@ import android.os.Parcelable
 import androidx.core.content.res.getColorOrThrow
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bluelinelabs.conductor.Router
 import kotlinx.android.synthetic.main.controller_feed.*
 import kt.mobius.Connectable
+import kt.mobius.extras.CompositeEffectHandler
 import kt.mobius.functions.Consumer
+import org.kodein.di.direct
+import org.kodein.di.erased.instance
 import realworld.base.BaseController
 import realworld.base.adapter
+import realworld.ui.navigation.ViewArticleNavigator
 
 /** Displays the global feed and user feed if authenticated. */
 class FeedController : BaseController<FeedModel, Any, Any>() {
@@ -26,9 +31,15 @@ class FeedController : BaseController<FeedModel, Any, Any>() {
   override val defaultModel = FeedModel.DEFAULT
   override val update = FeedUpdate
   override val init get() = FeedInit(kodein)
-  override val effectHandler = Connectable<Any, Any> {
-    FeedEffectHandler(it, kodein)
-  }
+  override val effectHandler = CompositeEffectHandler.from<Any, Any>(
+    Connectable {
+      FeedEffectHandler(it, kodein)
+    },
+    Connectable {
+      innerConnection(direct.instance<Router, ViewArticleNavigator>(arg = router))
+    }
+  )
+
   override val modelSerializer = object : ModelSerializer<FeedModel> {
     override fun deserialize(model: String): FeedModel {
       return FeedModel.deserialize(model)
@@ -46,7 +57,8 @@ class FeedController : BaseController<FeedModel, Any, Any>() {
       setColorSchemeColors(
         context.theme
           .obtainStyledAttributes(intArrayOf(R.attr.colorAccent))
-          .getColorOrThrow(0))
+          .getColorOrThrow(0)
+      )
     }
     recyclerFeed.apply {
       adapter = FeedAdapter(model.articles, model, output)

@@ -10,6 +10,7 @@ import realworld.service.ConduitService
 import realworld.ui.feed.FeedEffect.LoadArticles
 import realworld.ui.feed.FeedEffect.LoadArticlesFeed
 import realworld.ui.feed.FeedEvent.*
+import realworld.ui.navigation.ViewArticleNavigator
 
 
 val FeedUpdate = Update<FeedModel, Any, Any> { model, event ->
@@ -90,12 +91,8 @@ private fun onArticleClicked(
   model: FeedModel,
   event: OnArticleClicked
 ): Next<FeedModel, Any> {
-  val article = model.articles.single { it.slug == event.slug }
   return dispatch(
-    effects(
-     // AnalyticsEffect.Track("View", "Article", event.slug)/*,
-     //     NavigationEffect.GoToArticle(event.slug, stagingArticle = article)*/
-    )
+    effects(ViewArticleNavigator.Effect(event.article))
   )
 }
 

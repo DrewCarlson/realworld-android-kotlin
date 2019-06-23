@@ -1,7 +1,5 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlinx-serialization'
 
 android {
     compileSdkVersion 28
@@ -16,28 +14,12 @@ android {
     }
 }
 
-androidExtensions {
-    experimental = true
-}
-
 dependencies {
     implementation project(":base")
-    implementation project(":ui:navigation")
-    implementation project(":repository:article")
-
-    // Kotlinx
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
+    implementation project(":models")
 
     // Androidx
     implementation "androidx.core:core-ktx:$corektx_version"
-    implementation "androidx.appcompat:appcompat:$appcompat_version"
-    implementation "androidx.recyclerview:recyclerview:$recyclerview_version"
-    implementation "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
-
-    // Material components
-    implementation "com.google.android.material:material:$material_version"
 
     // Mobius: UI and App architecture
     api "kt.mobius:mobius-core-jvm:$mobiuskt_version"

@@ -19,9 +19,8 @@ import kt.mobius.functions.Producer
 import kt.mobius.runners.WorkRunner
 import kt.mobius.runners.WorkRunners
 import org.kodein.di.KodeinAware
-import org.kodein.di.android.kodein
+import org.kodein.di.android.closestKodein
 import java.io.File
-import java.util.*
 
 /**
  * This controller wires together a few important components:
@@ -35,11 +34,11 @@ abstract class BaseController<M, E, F>(
   args: Bundle? = null
 ) : Controller(args), KodeinAware, LayoutContainer {
 
-  /** Acquire Kodein from the [ConduitApp]. */
-  override val kodein by kodein {
-      requireNotNull(applicationContext) {
-        "Kodein cannot be called before applicationContext is set."
-      }
+  /** Acquire Kodein from the parent activity. */
+  override val kodein by closestKodein {
+    requireNotNull(activity) {
+      "Kodein cannot be called before activity is set."
+    }
   }
 
   /**
@@ -53,6 +52,8 @@ abstract class BaseController<M, E, F>(
 
   companion object {
     private val TAG = BaseController::class.java.simpleName
+
+    /** Key used for storing the model file path. */
     private val KEY_MODEL_FILE = "$TAG.MODEL_FILE"
 
     /** The default WorkRunner for handling events. */
@@ -177,7 +178,7 @@ abstract class BaseController<M, E, F>(
     Log.d(TAG, "Model serialization successful.")
     val file = try {
       Log.d(TAG, "Creating Temp file to save model.")
-      createTempFile("serial-model-${Date().time}")
+      createTempFile("app-model-")
     } catch (e: Exception) {
       Log.e(TAG, "Failed to create temp file.", e)
       return
@@ -215,7 +216,7 @@ abstract class BaseController<M, E, F>(
       }
       try {
         file.delete()
-      } catch(e: Exception) {
+      } catch (e: Exception) {
         Log.w(TAG, "Error deleting temporary file.", e)
       }
     }
@@ -322,6 +323,26 @@ abstract class BaseController<M, E, F>(
     override fun dispose() {
       onDisposeHandler?.invoke()
       onDisposeHandler = null
+    }
+  }
+
+
+  /**
+   * Returns a new [Connection] of [O] that only accepts values when
+   * [connection] receives a value of type [I] that is also [O].
+   */
+  // TODO: Move to mobius
+  inline fun <reified I, reified O> innerConnection(connection: Connection<I>): Connection<O> {
+    return object : Connection<O> {
+      override fun accept(value: O) {
+        if (value is I) {
+          connection.accept(value)
+        }
+      }
+
+      override fun dispose() {
+        connection.dispose()
+      }
     }
   }
 }

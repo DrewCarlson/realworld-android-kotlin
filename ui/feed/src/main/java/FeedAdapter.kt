@@ -49,8 +49,7 @@ class FeedAdapter(
         val view = inflater.inflate(R.layout.view_article, parent, false)
         ViewHolder.ArticleViewHolder(view).apply {
           itemView.setOnClickListener {
-            val article = articles[adapterPosition]
-            output.accept(FeedEvent.OnArticleClicked(article.slug))
+            output.accept(FeedEvent.OnArticleClicked(articles[adapterPosition]))
           }
         }
       }

@@ -6,4 +6,6 @@ include ':app',
         ':models',
         ':repository:core',
         ':repository:article',
-        ':ui:feed'
+        ':ui:navigation',
+        ':ui:feed',
+        ':ui:viewarticle'

@@ -13,6 +13,7 @@ sealed class FeedEffect {
     /** The size of the already loaded list of articles. */
     val offset: Int = 0
   ) : FeedEffect()
+
   /**
    * Call when more user feed articles are required.
    *
