@@ -1,2 +1,0 @@
-package realworld.base
-
