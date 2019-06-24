@@ -33,13 +33,13 @@ androidExtensions {
 }
 
 dependencies {
-    implementation project(":base")
     implementation project(":models")
     implementation project(":ui:navigation")
     implementation project(":ui:feed")
     implementation project(":ui:viewarticle")
     implementation project(":ui:signin")
     implementation project(":ui:signup")
+    implementation project(":knit:loop:framework-conductor")
 
     // Kotlinx
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"

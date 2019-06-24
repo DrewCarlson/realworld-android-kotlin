@@ -21,7 +21,7 @@ androidExtensions {
 }
 
 dependencies {
-    implementation project(":base")
+    implementation project(":ui:core")
     implementation project(":ui:navigation")
 
     // Kotlinx

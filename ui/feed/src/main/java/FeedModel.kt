@@ -1,8 +1,8 @@
 package realworld.ui.feed
 
+import knit.feature.paging.PagingModel
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import realworld.base.PagingModel
 import realworld.model.Article
 
 @Serializable

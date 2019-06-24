@@ -1,27 +1,39 @@
-package realworld.base
+package knit.loop.conductor
 
 import android.os.Bundle
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import androidx.appcompat.widget.Toolbar
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bluelinelabs.conductor.Controller
+import knit.feature.paging.PagingModel
+import knit.feature.paging.recyclerview.PagingScrollListener
+import knit.feature.paging.recyclerview.layoutManager
+import knit.loop.core.DefaultKnitLoopBuilder
+import knit.loop.core.KnitLoop
+import knit.loop.core.KnitLoopBuilder
+import knit.loop.core.KnitModelSerializer
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.*
-import kt.mobius.*
+import kt.mobius.Connectable
+import kt.mobius.Connection
+import kt.mobius.MobiusLoop
 import kt.mobius.android.AndroidLogger
 import kt.mobius.android.MobiusAndroid
 import kt.mobius.disposables.Disposable
 import kt.mobius.functions.Consumer
 import kt.mobius.functions.Producer
-import kt.mobius.runners.WorkRunner
 import kt.mobius.runners.WorkRunners
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.closestKodein
 import java.io.File
+
 
 /**
  * This controller wires together a few important components:
@@ -31,9 +43,12 @@ import java.io.File
  * 2) The Kodein dependency graph from [ConduitApp].
  * 3) [LayoutContainer] for using synthetic android extensions in [bindView].
  */
-abstract class BaseController<M, E, F>(
+abstract class KnitConductorController<M, E, F>(
   args: Bundle? = null
-) : Controller(args), KodeinAware, LayoutContainer {
+) : Controller(args),
+  KnitLoop<M, E, F>,
+  KodeinAware,
+  LayoutContainer {
 
   /** Acquire Kodein from the parent activity. */
   override val kodein by closestKodein {
@@ -42,17 +57,8 @@ abstract class BaseController<M, E, F>(
     }
   }
 
-  /**
-   * Represents a class capable of turning a model of [M]
-   * into a String for the purpose of disk storage.
-   */
-  interface ModelSerializer<M> {
-    fun serialize(model: M): String
-    fun deserialize(model: String): M
-  }
-
   companion object {
-    private val TAG = BaseController::class.java.simpleName
+    private val TAG = KnitConductorController::class.java.simpleName
 
     /** Key used for storing the model file path. */
     private val KEY_MODEL_FILE = "$TAG.MODEL_FILE"
@@ -80,38 +86,18 @@ abstract class BaseController<M, E, F>(
   /** */
   private var menu: Menu? = null
 
-  /**
-   * An optional [ModelSerializer] implementation used to restore
-   * the model after process death.
-   *
-   * The result of [ModelSerializer.serialize] will be written
-   * to a temporary file and restored with
-   * [ModelSerializer.deserialize] when the app is restored.
-   */
-  protected open val modelSerializer: ModelSerializer<M>? = null
+  override fun createKnitLoopBuilder(): KnitLoopBuilder<M, E, F> {
+    return DefaultLoopBuilder()
+  }
 
-  /** The model used when first constructing [loopFactory]. */
-  protected abstract val defaultModel: M
-  /** The update function used when constructing [loopFactory]. */
-  protected abstract val update: Update<M, E, F>
-  /** The optional effect handler used when constructing [loopFactory]. */
-  protected open val effectHandler: Connectable<F, E> =
-    Connectable {
-      object : Connection<F> {
-        override fun accept(value: F) = Unit
-        override fun dispose() = Unit
-      }
-    }
-  /** The optional init function used when constructing [loopFactory]. */
-  protected open val init: Init<M, F> =
-    Init { First.first(it) }
-  /** The optional logger used when constructing [loopFactory]. */
-  protected open val logger: MobiusLoop.Logger<M, E, F> =
-    AndroidLogger.tag(this::class.java.simpleName)
-  /** The optional WorkRunner used when constructing [loopFactory]. */
-  protected open val eventRunner: Producer<WorkRunner> = sharedEventRunner
-  /** The optional WorkRunner used when constructing [loopFactory]. */
-  protected open val effectRunner: Producer<WorkRunner> = sharedEffectRunner
+  private class DefaultLoopBuilder<M, E, F> : KnitLoopBuilder<M, E, F> by DefaultKnitLoopBuilder() {
+    override var logger: MobiusLoop.Logger<M, E, F> =
+      AndroidLogger.tag(this::class.java.simpleName)
+    override var eventRunner = sharedEventRunner
+    override var effectRunner = sharedEffectRunner
+  }
+
+  override fun modelSerializer(): KnitModelSerializer<M>? = null
 
   /**
    * Constructs the [MobiusLoop.Builder] using the overridable
@@ -119,13 +105,7 @@ abstract class BaseController<M, E, F>(
    *
    * Do not call during initialization.
    */
-  private val loopFactory by lazy {
-    Mobius.loop(update, effectHandler)
-      .eventRunner(eventRunner)
-      .effectRunner(effectRunner)
-      .logger(logger)
-      .init(init)
-  }
+  private val loopFactory by lazy { buildLoopFactory() }
 
   /**
    * Constructs the [MobiusLoop.Controller] using [loopFactory]
@@ -134,7 +114,7 @@ abstract class BaseController<M, E, F>(
    * Do not call during initialization.
    */
   protected val controller by lazy {
-    MobiusAndroid.controller(loopFactory, restoredModel ?: defaultModel)
+    MobiusAndroid.controller(loopFactory, restoredModel ?: defaultModel())
   }
 
   /**
@@ -176,7 +156,7 @@ abstract class BaseController<M, E, F>(
     super.onSaveInstanceState(outState)
     Log.d(TAG, "Attempting to serialize model.")
     val serialModel = try {
-      modelSerializer?.serialize(controller.model) ?: return
+      modelSerializer()?.serialize(controller.model) ?: return
     } catch (e: Exception) {
       Log.e(TAG, "Failed to serialize model.", e)
       return
@@ -215,7 +195,7 @@ abstract class BaseController<M, E, F>(
         return
       }
       restoredModel = try {
-        modelSerializer?.deserialize(fileText)
+        modelSerializer()?.deserialize(fileText)
       } catch (e: Exception) {
         Log.e(TAG, "Failed to deserialize model.", e)
         return
@@ -227,26 +207,6 @@ abstract class BaseController<M, E, F>(
       }
     }
   }
-
-  /**
-   * In here you will configure any listeners related to
-   * Android Views using the synthetic view android extension.
-   *
-   * If cleanup is required when the view is destroyed, use the
-   * returned [Disposable], it be called when cleanup should occur.
-   *
-   * @param model The current model for setting initial view states.
-   * @param output The [E] event consumer output.
-   * @see bindViews For a simplified aproach to event dispatching
-   */
-  abstract fun bindView(model: M, output: Consumer<E>): Disposable
-
-  /**
-   * Called every time the MobiusLoop model [M] changes.
-   *
-   * Here you will update the views and UI state using [model].
-   */
-  abstract fun render(model: M)
 
   /**
    *
@@ -329,7 +289,7 @@ abstract class BaseController<M, E, F>(
       event: E,
       prefetchOffset: Int = 0,
       extractPagingModel: (@ParameterName("model") M) -> PagingModel = { model ->
-        check(model is PagingModel) {
+        kotlin.check(model is PagingModel) {
           "Model must inherit PagingModel or provide extractPagingModel to bindLoadPageEvent."
         }
         model
@@ -348,26 +308,6 @@ abstract class BaseController<M, E, F>(
     override fun dispose() {
       onDisposeHandler?.invoke()
       onDisposeHandler = null
-    }
-  }
-
-
-  /**
-   * Returns a new [Connection] of [O] that only accepts values when
-   * the returned [Connection] receives a value of type [I] that is also [O].
-   */
-  // TODO: Move to mobius
-  inline fun <reified I, reified O> innerConnection(connection: Connection<I>): Connection<O> {
-    return object : Connection<O> {
-      override fun accept(value: O) {
-        if (value is I) {
-          connection.accept(value)
-        }
-      }
-
-      override fun dispose() {
-        connection.dispose()
-      }
     }
   }
 }

@@ -4,11 +4,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import knit.feature.paging.PagingModel
+import knit.feature.paging.recyclerview.BaseViewHolder
+import knit.ui.core.setUrl
 import kotlinx.android.synthetic.main.view_article.*
 import kt.mobius.functions.Consumer
-import realworld.base.BaseViewHolder
-import realworld.base.PagingModel
-import realworld.base.setUrl
 import realworld.model.Article
 
 /** Displays a list of [Article]s and paging states. */

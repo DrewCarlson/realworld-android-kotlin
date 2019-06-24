@@ -1,4 +1,4 @@
-package realworld.ui.navigation
+package knit.navigation.conductor
 
 import android.util.Log
 import com.bluelinelabs.conductor.Controller
@@ -6,6 +6,8 @@ import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
+import knit.navigation.core.NavigationEffect
+import knit.navigation.core.Navigator
 import kotlin.reflect.KClass
 
 /**
@@ -15,7 +17,7 @@ import kotlin.reflect.KClass
  */
 abstract class ConductorNavigator<T : NavigationEffect>(
   private val router: Router
-) : MainNavigator<T>() {
+) : Navigator<T> {
 
   companion object {
     private val TAG = ConductorNavigator::class.java.simpleName
@@ -32,6 +34,14 @@ abstract class ConductorNavigator<T : NavigationEffect>(
 
   /** The pop [ControllerChangeHandler] used in [createTransaction]. */
   open fun popChangeHandler(effect: T): ControllerChangeHandler = FadeChangeHandler()
+
+  override fun accept(value: T) {
+    synchronized(router) {
+      checkNotNull(router.activity).runOnUiThread {
+        super.accept(value)
+      }
+    }
+  }
 
   /** Navigate to the [Controller] returned by [createController]. */
   override fun navigate(effect: T) {
@@ -87,7 +97,10 @@ abstract class ConductorNavigator<T : NavigationEffect>(
         }
 
         when {
-          lastIndex > 0 -> router.setBackstack(backstack.take(lastIndex), null/* TODO: Change handler options */)
+          lastIndex > 0 -> router.setBackstack(
+            backstack.take(lastIndex),
+            null/* TODO: Change handler options */
+          )
           lastIndex == 0 -> router.popToRoot(null/* TODO: Change handler options */)
           else -> router.pushController(createTransaction())
         }
@@ -107,4 +120,8 @@ abstract class ConductorNavigator<T : NavigationEffect>(
             .popChangeHandler(popChangeHandler(event))
         } else transaction
       }
+
+  override fun dispose() {
+
+  }
 }

@@ -25,6 +25,8 @@ dependencies {
 
     // Ktor: HTTP Client
     implementation "io.ktor:ktor-client-core-jvm:$ktor_version"
+    implementation "io.ktor:ktor-client-android:$ktor_version"
+    implementation "io.ktor:ktor-client-serialization-jvm:$ktor_version"
 
     // Kodein: Dependency injection
     api "org.kodein.di:kodein-di-erased-jvm:$kodein_version"

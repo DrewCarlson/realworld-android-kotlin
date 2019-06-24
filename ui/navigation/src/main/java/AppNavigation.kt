@@ -1,5 +1,8 @@
 package realworld.ui.navigation
 
+import knit.navigation.core.NavigationData
+import knit.navigation.core.NavigationEffect
+import knit.navigation.core.Navigator
 import realworld.model.Article
 
 interface FeedNavigator : Navigator<FeedNavigator.Effect> {

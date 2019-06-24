@@ -1,6 +1,8 @@
-package realworld.ui.navigation
+package knit.navigation.main
 
 import android.util.Log
+import knit.navigation.core.NavigationEffect
+import knit.navigation.core.Navigator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 

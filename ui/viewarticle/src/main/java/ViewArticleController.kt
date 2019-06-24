@@ -1,13 +1,14 @@
 package realworld.ui.articleview
 
+import knit.loop.conductor.KnitConductorController
+import knit.loop.core.KnitModelSerializer
+import knit.ui.core.setUrl
 import kotlinx.android.synthetic.main.controller_view_article.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kt.mobius.Next.Companion.noChange
 import kt.mobius.Update
 import kt.mobius.functions.Consumer
-import realworld.base.BaseController
-import realworld.base.setUrl
 import realworld.model.Article
 
 @Serializable
@@ -24,26 +25,30 @@ sealed class ViewArticleEffect {
 }
 
 class ViewArticleController(
-  article: Article? = null
-) : BaseController<ViewArticleModel, Any, Any>() {
+  private var article: Article? = null
+) : KnitConductorController<ViewArticleModel, Any, Any>() {
 
   override val layoutId = R.layout.controller_view_article
-  override val defaultModel = ViewArticleModel(article)
-  override val update = Update<ViewArticleModel, Any, Any> { model, event ->
-    when (event) {
-      else -> noChange()
+  override fun defaultModel() = ViewArticleModel(article)
+
+  override fun buildLoopFactory() = loopFactory {
+    update = Update { model, event ->
+      when (event) {
+        else -> noChange()
+      }
     }
   }
 
-  override val modelSerializer = object : ModelSerializer<ViewArticleModel> {
-    override fun deserialize(model: String): ViewArticleModel {
-      return Json.nonstrict.parse(ViewArticleModel.serializer(), model)
-    }
+  override fun modelSerializer() =
+    object : KnitModelSerializer<ViewArticleModel> {
+      override fun deserialize(model: String): ViewArticleModel {
+        return Json.nonstrict.parse(ViewArticleModel.serializer(), model)
+      }
 
-    override fun serialize(model: ViewArticleModel): String {
-      return Json.nonstrict.stringify(ViewArticleModel.serializer(), model)
+      override fun serialize(model: ViewArticleModel): String {
+        return Json.nonstrict.stringify(ViewArticleModel.serializer(), model)
+      }
     }
-  }
 
   override fun bindView(
     model: ViewArticleModel,

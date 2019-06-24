@@ -1,4 +1,4 @@
-package realworld.ui.navigation
+package knit.navigation.core
 
 import android.util.Log
 import kt.mobius.Connection

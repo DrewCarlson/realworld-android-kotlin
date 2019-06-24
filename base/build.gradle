@@ -20,6 +20,8 @@ androidExtensions {
 }
 
 dependencies {
+    implementation project(":knit:loop:core")
+    api project(":knit:loop:framework-conductor")
     implementation project(":repository:article")
     implementation project(":service")
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"

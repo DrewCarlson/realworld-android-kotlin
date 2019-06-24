@@ -1,0 +1,25 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion 28
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+}
+// TODO: Convert into MPP module
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation project(":knit:navigation:core")
+
+    // Mobius: UI and App architecture
+    api "kt.mobius:mobius-core-jvm:$mobiuskt_version"
+    api "kt.mobius:mobius-extras-jvm:$mobiuskt_version"
+    testImplementation 'junit:junit:4.12'
+}

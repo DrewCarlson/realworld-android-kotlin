@@ -1,20 +1,20 @@
-package realworld.android
+package knit.loop.conductor
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.bluelinelabs.conductor.ChangeHandlerFrameLayout
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Router
+import knit.navigation.launch.LaunchScreen
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.closestKodein
 import org.kodein.di.erased.instance
-import realworld.ui.navigation.LaunchScreen
 
 /**
  * As the only activity in the app, here we configure
  * Conductor and drive the app's [LaunchScreen].
  */
-class MainActivity : AppCompatActivity(), KodeinAware {
+class KnitConductorActivity : AppCompatActivity(), KodeinAware {
 
   /** The [Router] managed by this activity. */
   private lateinit var router: Router

@@ -1,4 +1,4 @@
-package realworld.ui.navigation
+package knit.navigation.core
 
 /**
  * A common set of properties for Navigator execution.

@@ -1,25 +1,31 @@
-package realworld.base
+package knit.feature.paging.recyclerview
 
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.extensions.LayoutContainer
 
-/**
- * A simple base [RecyclerView.ViewHolder] with synthetic
- * view android extension support.
- */
-abstract class BaseViewHolder(
-  override val containerView: View
-) : RecyclerView.ViewHolder(containerView), LayoutContainer
 
 /** Returns [RecyclerView.getAdapter] as [A]. */
+// TODO: Move to utility module
 inline fun <reified A : RecyclerView.Adapter<*>> RecyclerView.adapter(): A {
   checkNotNull(adapter) { "Expected nonnull adapter." }
   return adapter as? A ?: error("Expected adapter to be of type ${A::class.java.simpleName}")
 }
 
+
+/**
+ * A simple base [RecyclerView.ViewHolder] with synthetic
+ * view android extension support.
+ */
+// TODO: Move to utility module
+abstract class BaseViewHolder(
+  override val containerView: View
+) : RecyclerView.ViewHolder(containerView), LayoutContainer
+
+
 /** Returns [RecyclerView.getLayoutManager] as [LM]. */
+// TODO: Move to utility module
 inline fun <reified LM : RecyclerView.LayoutManager> RecyclerView.layoutManager(): LM {
   checkNotNull(layoutManager) { "Expected nonnull layoutManager." }
   return layoutManager as? LM ?: error("Expected layoutManager to be of type ${LM::class.java.simpleName}")
@@ -30,6 +36,7 @@ inline fun <reified LM : RecyclerView.LayoutManager> RecyclerView.layoutManager(
  * when the bottom of the list is scrolled to, [isLoading] returns
  * false, and [hasMoreItems] is true.
  */
+// TODO: Move to knit:feature:pagging-android-recyclerview
 class PagingScrollListener(
   /** The item position information source. */
   private val layoutManager: LinearLayoutManager,

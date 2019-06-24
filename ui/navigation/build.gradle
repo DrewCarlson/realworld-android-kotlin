@@ -15,7 +15,10 @@ android {
 }
 
 dependencies {
-    implementation project(":base")
+    api project(":knit:navigation:core")
+    api project(":knit:navigation:framework-conductor")
+    api project(":knit:navigation:launch-navigator")
+    implementation project(":ui:core")
     implementation project(":models")
 
     // Androidx

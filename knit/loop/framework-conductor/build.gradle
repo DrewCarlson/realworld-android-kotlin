@@ -1,0 +1,53 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdkVersion 28
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+}
+
+androidExtensions {
+    experimental = true
+}
+
+dependencies {
+    api project(":knit:loop:core")
+    implementation project(":knit:navigation:launch-navigator")
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
+    // Androidx
+    // TODO: Move UI binding to new module
+    implementation "androidx.core:core-ktx:$corektx_version"
+    implementation "androidx.appcompat:appcompat:$appcompat_version"
+    implementation "androidx.recyclerview:recyclerview:$recyclerview_version"
+    implementation "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
+
+    // Material components
+    implementation "com.google.android.material:material:$material_version"
+
+    // Mobius: UI and App architecture
+    api "kt.mobius:mobius-core-jvm:$mobiuskt_version"
+    api "kt.mobius:mobius-extras-jvm:$mobiuskt_version"
+    api "kt.mobius:mobius-android:$mobiuskt_version"
+
+    // Conductor: View based navigation
+    api "com.bluelinelabs:conductor:$conductor_version"
+
+    // Kodein: Dependency injection
+    api "org.kodein.di:kodein-di-erased-jvm:$kodein_version"
+    api "org.kodein.di:kodein-di-framework-android-core:$kodein_version"
+
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+}

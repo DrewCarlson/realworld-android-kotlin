@@ -1,6 +1,9 @@
-package realworld.ui.navigation
+package knit.navigation.launch
 
 import android.util.Log
+import knit.navigation.core.NavigationData
+import knit.navigation.core.NavigationEffect
+import knit.navigation.core.Navigator
 
 /** Handles navigating to the initial screen when booting. */
 interface LaunchNavigator<F : NavigationEffect> : Navigator<F> {
@@ -18,12 +21,12 @@ interface LaunchScreen {
     private val TAG = LaunchScreen::class.java.simpleName
 
     inline operator fun <reified F : NavigationEffect> invoke(
-      default: F,
+      crossinline buildDefault: (@ParameterName("launchData") NavigationData) -> F,
       crossinline navigator: () -> Navigator<F>
     ): LaunchScreen {
       return object : LaunchScreen {
         override val launchNavigator: LaunchNavigator<NavigationEffect>
-          get() = createLaunchNavigator(default, navigator())
+          get() = createLaunchNavigator(buildDefault(NavigationData.coldLaunch()), navigator())
       }
     }
   }
