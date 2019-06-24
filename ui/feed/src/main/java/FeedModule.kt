@@ -14,7 +14,7 @@ val FeedModule = Kodein.Module("Feed") {
 
   bind<FeedNavigator>() with factory { router: Router ->
     object : ConductorNavigator<FeedNavigator.Effect>(router), FeedNavigator {
-      override fun getKClassForEffect(effect: FeedNavigator.Effect): KClass<*> = FeedController::class
+      override fun controllerKClassFor(effect: FeedNavigator.Effect): KClass<*> = FeedController::class
       override fun createController(effect: FeedNavigator.Effect) = FeedController()
     }
   }

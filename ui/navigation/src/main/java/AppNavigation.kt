@@ -40,3 +40,10 @@ interface SigninNavigator : Navigator<SigninNavigator.Effect> {
     override val navigationData: NavigationData = NavigationData.default()
   ) : NavigationEffect
 }
+
+interface SignupNavigator : Navigator<SignupNavigator.Effect> {
+
+  data class Effect(
+    override val navigationData: NavigationData = NavigationData.default()
+  ) : NavigationEffect
+}

@@ -23,6 +23,7 @@ androidExtensions {
 dependencies {
     implementation project(":ui:core")
     implementation project(":ui:navigation")
+    implementation project(":service")
 
     // Kotlinx
     api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
@@ -49,6 +50,8 @@ dependencies {
     // Kodein: Dependency injection
     api "org.kodein.di:kodein-di-erased-jvm:$kodein_version"
     api "org.kodein.di:kodein-di-framework-android-core:$kodein_version"
+
+    implementation "io.ktor:ktor-client-core-jvm:$ktor_version"
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'

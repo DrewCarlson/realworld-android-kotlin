@@ -87,12 +87,13 @@ abstract class KnitConductorController<M, E, F>(
   private var menu: Menu? = null
 
   override fun createKnitLoopBuilder(): KnitLoopBuilder<M, E, F> {
-    return DefaultLoopBuilder()
+    return object : DefaultLoopBuilder<M, E, F>() {
+      override var logger: MobiusLoop.Logger<M, E, F> =
+        AndroidLogger.tag(this@KnitConductorController.javaClass.simpleName)
+    }
   }
 
-  private class DefaultLoopBuilder<M, E, F> : KnitLoopBuilder<M, E, F> by DefaultKnitLoopBuilder() {
-    override var logger: MobiusLoop.Logger<M, E, F> =
-      AndroidLogger.tag(this::class.java.simpleName)
+  private open class DefaultLoopBuilder<M, E, F> : KnitLoopBuilder<M, E, F> by DefaultKnitLoopBuilder() {
     override var eventRunner = sharedEventRunner
     override var effectRunner = sharedEffectRunner
   }

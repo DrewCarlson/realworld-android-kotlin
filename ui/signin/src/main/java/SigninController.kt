@@ -17,6 +17,7 @@ import kt.mobius.functions.Consumer
 import org.kodein.di.direct
 import org.kodein.di.erased.instance
 import realworld.ui.navigation.FeedNavigator
+import realworld.ui.navigation.SignupNavigator
 
 /** */
 class SigninController : KnitConductorController<SigninModel, Any, Any>(null) {
@@ -48,6 +49,9 @@ class SigninController : KnitConductorController<SigninModel, Any, Any>(null) {
       },
       Connectable {
         innerConnection(direct.instance<Router, FeedNavigator>(arg = router))
+      },
+      Connectable {
+        innerConnection(direct.instance<Router, SignupNavigator>(arg = router))
       }
     )
   }
@@ -55,13 +59,10 @@ class SigninController : KnitConductorController<SigninModel, Any, Any>(null) {
   override fun bindView(model: SigninModel, output: Consumer<Any>) =
     bindViews(output) {
       buttonSignin.bindClickEvent(SigninEvent.OnSigninClicked)
+      buttonNeedAccount.bindClickEvent(SigninEvent.OnNeedAccountClicked)
+
       inputEmail.bindTextChange(SigninEvent::OnEmailChanged)
       inputPassword.bindTextChange(SigninEvent::OnPasswordChanged)
-
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        inputEmail.setAutofillHints(View.AUTOFILL_HINT_EMAIL_ADDRESS)
-        inputPassword.setAutofillHints(View.AUTOFILL_HINT_PASSWORD)
-      }
     }
 
   override fun render(model: SigninModel) {

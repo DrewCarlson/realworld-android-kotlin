@@ -13,7 +13,7 @@ import kotlin.reflect.KClass
 val ViewArticleModule = Kodein.Module("View Article") {
   bind<ViewArticleNavigator>() with factory { router: Router ->
     object : ConductorNavigator<ViewArticleNavigator.Effect>(router), ViewArticleNavigator {
-      override fun getKClassForEffect(effect: ViewArticleNavigator.Effect): KClass<*> =
+      override fun controllerKClassFor(effect: ViewArticleNavigator.Effect): KClass<*> =
         ViewArticleController::class
 
       override fun createController(effect: ViewArticleNavigator.Effect) =

@@ -9,7 +9,6 @@ import kt.mobius.runners.WorkRunner
 
 
 interface KnitLoopBuilder<M, E, F> {
-
   var update: Update<M, E, F>
   var init: Init<M, F>
   var logger: MobiusLoop.Logger<M, E, F>

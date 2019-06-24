@@ -16,7 +16,7 @@ val SigninModule = Kodein.Module("Signin") {
 
   bind<SigninNavigator>() with factory { router: Router ->
     object : ConductorNavigator<SigninNavigator.Effect>(router), SigninNavigator {
-      override fun getKClassForEffect(effect: SigninNavigator.Effect): KClass<*> = SigninController::class
+      override fun controllerKClassFor(effect: SigninNavigator.Effect): KClass<*> = SigninController::class
       override fun createController(effect: SigninNavigator.Effect) = SigninController()
 
       override fun pushChangeHandler(effect: SigninNavigator.Effect) =

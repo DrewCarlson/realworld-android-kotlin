@@ -13,6 +13,7 @@ import realworld.ui.articleview.ViewArticleModule
 import realworld.ui.feed.FeedModule
 import realworld.ui.navigation.FeedNavigator
 import realworld.ui.signin.SigninModule
+import realworld.ui.signup.SignupModule
 
 /**
  *
@@ -24,6 +25,7 @@ class ConduitApp : Application(), KodeinAware {
     importOnce(FeedModule)
     importOnce(SigninModule)
     importOnce(ViewArticleModule)
+    importOnce(SignupModule)
 
     bind<LaunchScreen>() with factory { router: Router ->
       LaunchScreen({ FeedNavigator.Effect(it) }) {

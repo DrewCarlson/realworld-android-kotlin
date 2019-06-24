@@ -27,7 +27,7 @@ abstract class ConductorNavigator<T : NavigationEffect>(
   abstract fun createController(effect: T): Controller
 
   /** Returns the [KClass] of the controller for the configured [effect]. */
-  abstract fun getKClassForEffect(effect: T): KClass<*>
+  abstract fun controllerKClassFor(effect: T): KClass<*>
 
   /** The push [ControllerChangeHandler] used in [createTransaction]. */
   open fun pushChangeHandler(effect: T): ControllerChangeHandler = FadeChangeHandler()
@@ -81,7 +81,7 @@ abstract class ConductorNavigator<T : NavigationEffect>(
         val backstack = router.backstack
         val isPreviousInStack = backstack
           .filterIndexed { index, routerTransaction ->
-            routerTransaction.controller()::class == getKClassForEffect(effect) &&
+            routerTransaction.controller()::class == controllerKClassFor(effect) &&
                 index == backstack.lastIndex - 1
           }.size == 1
         if (isPreviousInStack) {
@@ -93,7 +93,7 @@ abstract class ConductorNavigator<T : NavigationEffect>(
       navigationData.popToPrevious -> {
         val backstack = router.backstack
         val lastIndex = backstack.indexOfLast { routerTransaction ->
-          routerTransaction.controller()::class == getKClassForEffect(effect)
+          routerTransaction.controller()::class == controllerKClassFor(effect)
         }
 
         when {

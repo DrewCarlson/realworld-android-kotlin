@@ -34,11 +34,13 @@ class ConduitService(
   }
 
   suspend fun register(username: String, email: String, password: String) = onIO {
-    httpClient.post<User>("api/users/register") {
+    httpClient.post<RegisterResponse>("api/users") {
       jsonBody {
-        "email" to email
-        "username" to username
-        "password" to password
+        "user" to json {
+          "email" to email
+          "username" to username
+          "password" to password
+        }
       }
     }
   }
