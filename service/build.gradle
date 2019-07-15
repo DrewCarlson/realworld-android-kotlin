@@ -1,33 +1,102 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-multiplatform'
 apply plugin: 'kotlinx-serialization'
+apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 28
-
-    defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
-
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+  compileSdkVersion 28
+  defaultConfig {
+    minSdkVersion 21
+    targetSdkVersion 28
+    sourceSets.main {
+      manifest.srcFile("android/AndroidManifest.xml")
     }
+  }
 }
 
-dependencies {
-    api project(":models")
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+kotlin {
+  js {
+    browser {
+      testTask {
+        useKarma {
+          useChromeHeadless()
+        }
+      }
+    }
+  }
+  android()
+  iosX64()
 
-    // Kotlinx
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
+  sourceSets {
+    commonMain {
+      kotlin.srcDir("src")
+      dependencies {
+        implementation kotlin("stdlib-common")
+        implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+        implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
 
-    // Ktor: HTTP Client
-    implementation "io.ktor:ktor-client-core-jvm:$ktor_version"
-    implementation "io.ktor:ktor-client-android:$ktor_version"
-    implementation "io.ktor:ktor-client-serialization-jvm:$ktor_version"
+        implementation project(":models")
+        implementation "org.kodein.di:kodein-di-core:$kodein_version"
+        implementation "org.kodein.di:kodein-di-erased:$kodein_version"
+        api "io.ktor:ktor-client-core:$ktor_version"
+        implementation "io.ktor:ktor-client-serialization:$ktor_version"
+        implementation "io.ktor:ktor-client-json:$ktor_version"
+      }
+    }
+    commonTest {
+      kotlin.srcDir("test")
+      dependencies {
+        implementation kotlin("test-common")
+        implementation kotlin("test-annotations-common")
+      }
+    }
+    jsMain {
+      kotlin.srcDir("js/src")
+      dependencies {
+        implementation kotlin("stdlib-js")
+        implementation "io.ktor:ktor-client-js:$ktor_version"
+        implementation "io.ktor:ktor-client-serialization-js:$ktor_version"
+        implementation "io.ktor:ktor-client-json-js:$ktor_version"
+        implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$coroutines_version"
+        implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
+      }
+    }
+    jsTest {
+      kotlin.srcDir("js/test")
+      dependencies {
+        implementation kotlin("test-js")
+      }
+    }
+    androidMain {
+      kotlin.srcDir("android/src")
+      dependencies {
+        implementation kotlin("stdlib-jdk8")
+        implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+        implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
 
-    // Kodein: Dependency injection
-    api "org.kodein.di:kodein-di-erased-jvm:$kodein_version"
+        implementation "io.ktor:ktor-client-android:$ktor_version"
+        implementation "io.ktor:ktor-client-serialization-jvm:$ktor_version"
+        implementation "io.ktor:ktor-client-json-jvm:$ktor_version"
+      }
+    }
+    androidTest {
+      kotlin.srcDir("android/test")
+      dependencies {
+        implementation kotlin("test")
+        implementation kotlin("test-junit")
+      }
+    }
+    iosX64Main {
+      kotlin.srcDir("ios/src")
+      dependencies {
+        implementation "io.ktor:ktor-client-ios:$ktor_version"
+        implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-native:$coroutines_version"
+        implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-native:$serialization_version"
+        implementation "io.ktor:ktor-client-serialization-native:$ktor_version"
+        implementation "io.ktor:ktor-client-json-native:$ktor_version"
+      }
+    }
+    iosX64Test {
+      kotlin.srcDir("ios/test")
+    }
+  }
 }

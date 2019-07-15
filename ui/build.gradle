@@ -1,0 +1,139 @@
+subprojects {
+  apply plugin: 'kotlin-multiplatform'
+  apply plugin: 'kotlin-kapt'
+  apply plugin: 'kotlin-android-extensions'
+  apply plugin: 'kotlinx-serialization'
+  apply plugin: 'com.android.library'
+
+  android {
+    compileSdkVersion 28
+    defaultConfig {
+      minSdkVersion 21
+      targetSdkVersion 28
+      sourceSets.main {
+        manifest.srcFile("android/AndroidManifest.xml")
+        res.srcDir("android/res")
+      }
+    }
+
+    dataBinding {
+      enabled = true
+    }
+  }
+
+  kotlin {
+    js {
+      browser {
+        testTask {
+          useKarma {
+            useChromeHeadless()
+          }
+        }
+      }
+    }
+    android()
+    iosX64()
+
+    sourceSets {
+      commonMain {
+        kotlin.srcDir("src")
+        dependencies {
+          implementation kotlin("stdlib-common")
+          implementation "kt.mobius:mobius-core:$mobiuskt_version"
+          implementation "kt.mobius:mobius-extras:$mobiuskt_version"
+          implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+          implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
+
+          implementation "org.kodein.di:kodein-di-core:$kodein_version"
+          implementation "org.kodein.di:kodein-di-erased:$kodein_version"
+
+          implementation project(":models")
+
+          if (project.name != "navigation") {
+            implementation project(":ui:navigation")
+
+            if (project.name != "core") {
+              implementation project(":ui:core")
+              implementation project(":service")
+              implementation project(":repository:article")
+            }
+          }
+        }
+      }
+      commonTest {
+        kotlin.srcDir("test")
+        dependencies {
+          implementation kotlin("test-common")
+          implementation kotlin("test-annotations-common")
+        }
+      }
+      jsMain {
+        kotlin.srcDir("js/src")
+        dependencies {
+          implementation kotlin("stdlib-js")
+          implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
+        }
+      }
+      jsTest {
+        kotlin.srcDir("js/test")
+        dependencies {
+          implementation kotlin("test-js")
+        }
+      }
+      androidMain {
+        kotlin.srcDir("android/src")
+        dependencies {
+          implementation kotlin("stdlib-jdk8")
+          implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
+
+          implementation "kt.mobius:mobius-core-jvm:$mobiuskt_version"
+          implementation "kt.mobius:mobius-extras-jvm:$mobiuskt_version"
+          implementation "kt.mobius:mobius-android:$mobiuskt_version"
+
+          implementation "org.kodein.di:kodein-di-framework-android-x:$kodein_version"
+
+          implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+          implementation "com.bluelinelabs:conductor:$conductor_version"
+
+          implementation "androidx.core:core-ktx:$corektx_version"
+          implementation "androidx.appcompat:appcompat:$appcompat_version"
+          implementation "androidx.recyclerview:recyclerview:$recyclerview_version"
+          implementation "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
+
+          implementation "com.google.android.material:material:$material_version"
+        }
+      }
+      androidTest {
+        kotlin.srcDir("android/test")
+        dependencies {
+          implementation kotlin("test")
+          implementation kotlin("test-junit")
+          implementation "kt.mobius:mobius-core-jvm:$mobiuskt_version"
+          implementation "kt.mobius:mobius-extras-jvm:$mobiuskt_version"
+          implementation "kt.mobius:mobius-android:$mobiuskt_version"
+
+          implementation "org.kodein.di:kodein-di-framework-android-x:$kodein_version"
+
+          implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+          implementation "com.bluelinelabs:conductor:$conductor_version"
+
+          implementation "androidx.core:core-ktx:$corektx_version"
+          implementation "androidx.appcompat:appcompat:$appcompat_version"
+          implementation "androidx.recyclerview:recyclerview:$recyclerview_version"
+          implementation "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
+
+          implementation "com.google.android.material:material:$material_version"
+        }
+      }
+      iosX64Main {
+        kotlin.srcDir("ios/src")
+        dependencies {
+          implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-native:$serialization_version"
+        }
+      }
+      iosX64Test {
+        kotlin.srcDir("ios/test")
+      }
+    }
+  }
+}

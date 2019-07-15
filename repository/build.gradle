@@ -1,0 +1,91 @@
+subprojects {
+  apply plugin: 'kotlin-multiplatform'
+  apply plugin: 'kotlin-android-extensions'
+  apply plugin: 'kotlinx-serialization'
+  apply plugin: 'com.android.library'
+
+  android {
+    compileSdkVersion 28
+    defaultConfig {
+      minSdkVersion 21
+      targetSdkVersion 28
+      sourceSets.main.manifest.srcFile("AndroidManifest.xml")
+    }
+  }
+
+  androidExtensions {
+    experimental = true
+  }
+
+  kotlin {
+    js {
+      browser {
+        testTask {
+          useKarma {
+            useChromeHeadless()
+          }
+        }
+      }
+    }
+    android()
+    iosX64()
+
+    sourceSets {
+      commonMain {
+        kotlin.srcDir("src")
+        dependencies {
+          implementation kotlin("stdlib-common")
+          implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+
+          if (project.name != "core") {
+            api project(":repository:core")
+          }
+
+          api project(":models")
+          implementation project(":service")
+          implementation "org.kodein.di:kodein-di-core:$kodein_version"
+          implementation "org.kodein.di:kodein-di-erased:$kodein_version"
+          implementation "io.ktor:ktor-client-core:$ktor_version"
+        }
+      }
+      commonTest {
+        kotlin.srcDir("test")
+        dependencies {
+          implementation kotlin("test-common")
+          implementation kotlin("test-annotations-common")
+        }
+      }
+      jsMain {
+        dependencies {
+          implementation kotlin("stdlib-js")
+          implementation "io.ktor:ktor-client-js:$ktor_version"
+          implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$coroutines_version"
+        }
+      }
+      jsTest {
+        dependencies {
+          implementation kotlin("test-js")
+        }
+      }
+      androidMain {
+        kotlin.srcDir("android/src")
+        dependencies {
+          implementation kotlin("stdlib-jdk8")
+          implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+          implementation "io.ktor:ktor-client-core-jvm:$ktor_version"
+        }
+      }
+      androidTest {
+        dependencies {
+          implementation kotlin("test")
+          implementation kotlin("test-junit")
+        }
+      }
+      iosX64Main {
+        dependencies {
+          implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-native:$coroutines_version"
+        }
+      }
+    }
+  }
+}

@@ -15,6 +15,10 @@ For more information on how to this works with other frontends/backends, head ov
 
 # How it works
 
-This repository contains a modularized Android application written in Kotlin.
+This repository contains a modularized gradle project for multiplatform RealWorld clients built using the [Kotlin Multiplatform Gradle plugin](https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html).
+
+Note on project structure: while the code in this repo works in every project, the file and folder layouts are in some cases not default.
+These deviations will be called out where possible and you can see these modifications in `build.gradle` files.
+
 
 # Getting started

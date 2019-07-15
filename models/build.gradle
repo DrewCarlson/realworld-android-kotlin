@@ -1,22 +1,73 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-multiplatform'
 apply plugin: 'kotlinx-serialization'
+apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 28
-
-    defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
-
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+  compileSdkVersion 28
+  defaultConfig {
+    minSdkVersion 21
+    targetSdkVersion 28
+    sourceSets.main {
+      manifest.srcFile("AndroidManifest.xml")
     }
+  }
 }
 
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
+kotlin {
+  js {
+    browser {
+      testTask {
+        useKarma {
+          useChromeHeadless()
+        }
+      }
+    }
+  }
+  android()
+  iosX64()
+
+  sourceSets {
+    commonMain {
+      kotlin.srcDir("src")
+      dependencies {
+        implementation kotlin("stdlib-common")
+        implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
+      }
+    }
+    commonTest {
+      kotlin.srcDir("test")
+      dependencies {
+        implementation kotlin("test-common")
+        implementation kotlin("test-annotations-common")
+      }
+    }
+    jsMain {
+      dependencies {
+        implementation kotlin("stdlib-js")
+        implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
+      }
+    }
+    jsTest {
+      dependencies {
+        implementation kotlin("test-js")
+      }
+    }
+    androidMain {
+      dependencies {
+        implementation kotlin("stdlib-jdk8")
+        implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
+      }
+    }
+    androidTest {
+      dependencies {
+        implementation kotlin("test")
+        implementation kotlin("test-junit")
+      }
+    }
+    iosX64Main {
+      dependencies {
+        implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-native:$serialization_version"
+      }
+    }
+  }
 }

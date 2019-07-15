@@ -4,67 +4,75 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
 
 android {
-    compileSdkVersion 28
+  compileSdkVersion 28
 
-    defaultConfig {
-        applicationId "realworld.android"
-        minSdkVersion 21
-        targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+  defaultConfig {
+    applicationId "realworld.android"
+    minSdkVersion 21
+    targetSdkVersion 28
+  }
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+  buildTypes {
+    release {
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
     }
+  }
 
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
+  packagingOptions {
+    exclude 'META-INF/*.kotlin_module'
+  }
 
-    packagingOptions {
-        exclude 'META-INF/*.kotlin_module'
-    }
+  dataBinding {
+    enabled = true
+  }
 }
 
 androidExtensions {
-    experimental = true
+  experimental = true
 }
 
 dependencies {
-    implementation project(":models")
-    implementation project(":ui:navigation")
-    implementation project(":ui:feed")
-    implementation project(":ui:viewarticle")
-    implementation project(":ui:signin")
-    implementation project(":ui:signup")
-    implementation project(":knit:loop:framework-conductor")
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+  implementation project(":repository:article")
+  implementation project(":models")
+  implementation project(":ui:core")
+  implementation project(":ui:navigation")
+  implementation project(":ui:feed")
+  implementation project(":ui:viewarticle")
+  //implementation project(":ui:signin")
+  //implementation project(":ui:signup")
 
-    // Kotlinx
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
+  // Kotlinx
+  implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+  implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+  implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
 
-    // Androidx
-    implementation "androidx.core:core-ktx:$corektx_version"
-    implementation "androidx.appcompat:appcompat:$appcompat_version"
-    implementation "androidx.recyclerview:recyclerview:$recyclerview_version"
-    implementation "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
+  // Androidx
+  implementation "androidx.core:core-ktx:$corektx_version"
+  implementation "androidx.appcompat:appcompat:$appcompat_version"
+  implementation "androidx.recyclerview:recyclerview:$recyclerview_version"
+  implementation "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
 
-    // Material components
-    implementation "com.google.android.material:material:$material_version"
+  // Material components
+  implementation "com.google.android.material:material:$material_version"
 
-    // Leakcanary: Memory leak tracking
-    debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakcanary_version"
+  implementation "com.bluelinelabs:conductor:$conductor_version"
 
-    // TODO: Move to repo module
-    implementation "io.ktor:ktor-client-core-jvm:$ktor_version"
+  // Leakcanary: Memory leak tracking
+  debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakcanary_version"
 
-    // Kodein: Dependency injection
-    implementation "org.kodein.di:kodein-di-framework-android-x:$kodein_version"
+  // Picasso: Image loading
+  implementation "com.squareup.picasso:picasso:$picasso_version"
 
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+  // Kodein: Dependency injection
+  implementation "org.kodein.di:kodein-di-erased-jvm:$kodein_version"
+  implementation "org.kodein.di:kodein-di-framework-android-x:$kodein_version"
+
+  implementation "kt.mobius:mobius-core-jvm:$mobiuskt_version"
+  implementation "kt.mobius:mobius-android:$mobiuskt_version"
+
+  testImplementation 'junit:junit:4.12'
+  androidTestImplementation 'androidx.test:runner:1.2.0'
+  androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }

@@ -1,20 +1,15 @@
 rootProject.name = 'realworld-kotlin'
 
 include ':app',
-        ':service',
-        ':models',
-        ':repository:core',
-        ':repository:article',
-        ':ui:core',
-        ':ui:navigation',
-        ':ui:feed',
-        ':ui:viewarticle',
-        ':ui:signin',
-        ':ui:signup'
+    ':service',
+    ':models',
+    ':repository:core',
+    ':repository:article',
+    ':ui:core',
+    ':ui:navigation',
+    ':ui:feed',
+    ':ui:viewarticle',
+    ':ui:signin',
+    ':ui:signup'
 
-include ':knit:navigation:core',
-        ':knit:navigation:framework-conductor',
-        ':knit:navigation:main-navigator',
-        ':knit:navigation:launch-navigator',
-        ':knit:loop:core',
-        ':knit:loop:framework-conductor'
+enableFeaturePreview("GRADLE_METADATA")
